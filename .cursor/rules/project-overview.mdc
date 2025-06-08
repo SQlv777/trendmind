@@ -1,0 +1,25 @@
+# TrendMind 项目概览
+
+TrendMind 是一个技术趋势聚合平台，主要功能包括：
+
+## 核心功能
+- **GitHub 趋势抓取**：获取 GitHub Trending 项目数据
+- **AI 新闻聚合**：抓取多个 AI 新闻 RSS 源
+- **AI 摘要翻译**：使用 DeepSeek-v3 生成摘要并翻译
+- **网页展示**：Next.js 前端，支持中英文切换
+- **邮件推送**：定时发送多语言摘要到用户邮箱
+
+## 技术栈
+- 前端：Next.js + TypeScript + Tailwind CSS
+- AI 模型：DeepSeek-v3
+- 数据源：GitHub API + RSS 源
+- 邮件服务：待定
+
+## 目标用户
+- 技术开发者
+- AI 研究者与关注者
+- 中英文用户群体
+
+## 项目文档
+详细需求请参考 [TrendMind_项目需求说明书.md](mdc:TrendMind_项目需求说明书.md)
+系统架构请参考 [TrendMind_系统架构设计文档.md](mdc:TrendMind_系统架构设计文档.md)

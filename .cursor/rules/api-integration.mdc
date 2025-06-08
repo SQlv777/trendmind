@@ -1,0 +1,70 @@
+# TrendMind API 集成指南
+
+## 外部 API 集成
+
+### 1. GitHub API
+- **用途**：获取 GitHub Trending 项目数据
+- **端点**：`https://api.github.com/search/repositories`
+- **参数**：
+  - `q`: 搜索查询（按时间范围筛选）
+  - `sort`: 排序方式（stars, updated）
+  - `order`: 排序顺序（desc）
+- **频率限制**：注意 GitHub API 的速率限制
+- **认证**：建议使用 GitHub Token 提高限制
+
+### 2. RSS 新闻源
+- **目标源**：AI 相关的英文新闻网站
+- **解析库**：使用 RSS 解析库（如 `rss-parser`）
+- **数据提取**：标题、内容、发布时间、链接
+- **去重逻辑**：基于标题或链接进行去重
+
+### 3. DeepSeek-v3 API
+- **用途**：内容摘要生成和多语言翻译
+- **集成方式**：
+  - API 密钥管理
+  - 请求格式化
+  - 响应处理
+- **成本控制**：
+  - 设置每日调用上限
+  - 内容长度限制
+  - 缓存机制减少重复调用
+
+### 4. 邮件服务 API
+- **选项**：SendGrid、Mailgun、AWS SES 等
+- **功能需求**：
+  - 批量发送
+  - 模板支持
+  - 多语言邮件
+  - 发送状态跟踪
+
+## API 路由设计
+
+### Next.js API Routes
+```
+/api/github/trending     - 获取 GitHub 趋势
+/api/news/fetch         - 抓取新闻数据
+/api/ai/summarize       - AI 摘要生成
+/api/ai/translate       - AI 翻译
+/api/email/send         - 邮件发送
+/api/cron/daily         - 每日定时任务
+```
+
+## 环境变量配置
+```
+GITHUB_TOKEN=your_github_token
+DEEPSEEK_API_KEY=your_deepseek_key
+EMAIL_SERVICE_KEY=your_email_key
+DATABASE_URL=your_database_url
+```
+
+## 错误处理
+- API 调用失败的重试机制
+- 速率限制的处理策略
+- 错误日志记录
+- 用户友好的错误提示
+
+## 缓存策略
+- GitHub 数据缓存（避免频繁调用）
+- AI 生成内容缓存（节省成本）
+- 新闻数据缓存（提高响应速度）
+- 使用 Redis 或内存缓存

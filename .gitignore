@@ -25,3 +25,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# development files
+.cursor/
+*.log
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# temporary files
+*.tmp
+*.swp
+*.swo

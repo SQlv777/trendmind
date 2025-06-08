@@ -9,6 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // 外部包配置
+  serverExternalPackages: ['rss-parser'],
 }
 
 export default nextConfig

@@ -1,113 +1,120 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Star, ExternalLink, Clock } from "lucide-react"
-
-// GitHub 趋势数据
-const trendingRepos = [
-  {
-    name: "microsoft/TypeScript",
-    description: "TypeScript 是 JavaScript 的超集，添加了类型系统",
-    stars: 98234,
-    todayStars: 234,
-    language: "TypeScript",
-    url: "#",
-  },
-  {
-    name: "vercel/next.js",
-    description: "React 全栈框架，支持服务端渲染和静态生成",
-    stars: 118567,
-    todayStars: 189,
-    language: "JavaScript",
-    url: "#",
-  },
-  {
-    name: "openai/whisper",
-    description: "强大的语音识别模型，支持多种语言",
-    stars: 65432,
-    todayStars: 156,
-    language: "Python",
-    url: "#",
-  },
-  {
-    name: "rust-lang/rust",
-    description: "高性能、内存安全的系统编程语言",
-    stars: 87654,
-    todayStars: 145,
-    language: "Rust",
-    url: "#",
-  },
-]
-
-// AI 新闻数据
-const aiNews = [
-  {
-    title: "OpenAI 发布 GPT-4 Turbo 新版本",
-    summary: "新模型具有更强的推理能力和更低的成本，在代码生成和数学推理方面有显著提升。",
-    time: "2小时前",
-    source: "TechCrunch",
-    url: "#",
-  },
-  {
-    title: "Google DeepMind 蛋白质折叠新突破",
-    summary: "AlphaFold 3 能够预测更复杂的蛋白质结构，为药物发现开辟新途径。",
-    time: "4小时前",
-    source: "Nature",
-    url: "#",
-  },
-  {
-    title: "Microsoft Copilot 扩展到更多应用",
-    summary: "Copilot AI 助手将集成到 Excel、PowerPoint 和 Outlook 中，提升办公效率。",
-    time: "6小时前",
-    source: "Microsoft",
-    url: "#",
-  },
-  {
-    title: "Meta 开源大型多模态模型",
-    summary: "新模型支持文本、图像和音频处理，并提供开源许可，促进AI研究社区发展。",
-    time: "8小时前",
-    source: "VentureBeat",
-    url: "#",
-  },
-]
+import { Star, ExternalLink, Clock, Github, Newspaper } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ContentData, TrendingItem, NewsItem } from "@/lib/types"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 export function ContentSection() {
+  const { t, language } = useLanguage()
+  const [content, setContent] = useState<ContentData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('combined')
+
+  useEffect(() => {
+    fetchContent()
+  }, [])
+
+  const fetchContent = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/content')
+      const result = await response.json()
+      
+      if (result.success) {
+        setContent(result.data)
+      } else {
+        console.error('Failed to fetch content:', result.error)
+      }
+    } catch (error) {
+      console.error('Error fetching content:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading && !content) {
+    return (
+      <section id="content" className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className="py-16">
+    <section id="content" className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <Tabs defaultValue="combined" className="mb-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {t('todayTechUpdates')}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            {t('heroSubtitle')}
+          </p>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-            <TabsTrigger value="combined">全部</TabsTrigger>
-            <TabsTrigger value="github">GitHub 趋势</TabsTrigger>
-            <TabsTrigger value="ai">AI 新闻</TabsTrigger>
+            <TabsTrigger value="combined">
+              {t('all')}
+            </TabsTrigger>
+            <TabsTrigger value="github">
+              <Github className="h-4 w-4 mr-1" />
+              {t('github')}
+            </TabsTrigger>
+            <TabsTrigger value="ai">
+              <Newspaper className="h-4 w-4 mr-1" />
+              {t('aiNews')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="combined">
             <div className="grid lg:grid-cols-2 gap-8 mt-8">
-              <div>
+              <div id="trending">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">GitHub 趋势</h2>
-                  <a href="#" className="text-sm text-blue-600 hover:underline">
-                    查看更多
-                  </a>
+                  <h3 className="text-2xl font-semibold text-gray-900 flex items-center">
+                    <Github className="h-6 w-6 mr-2 text-blue-600" />
+                    GitHub {language === 'zh' ? '趋势' : 'Trending'}
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    {content?.trending.length || 0} {language === 'zh' ? '个项目' : 'projects'}
+                  </span>
                 </div>
                 <div className="space-y-4">
-                  {trendingRepos.slice(0, 3).map((repo, index) => (
-                    <GithubCard key={index} repo={repo} />
-                  ))}
+                  {content?.trending.slice(0, 6).map((repo, index) => (
+                    <GithubCard key={index} repo={repo} language={language} />
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      {language === 'zh' ? '暂无数据' : 'No data available'}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div>
+              <div id="news">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-gray-900">AI 新闻</h2>
-                  <a href="#" className="text-sm text-blue-600 hover:underline">
-                    查看更多
-                  </a>
+                  <h3 className="text-2xl font-semibold text-gray-900 flex items-center">
+                    <Newspaper className="h-6 w-6 mr-2 text-purple-600" />
+                    AI {language === 'zh' ? '新闻' : 'News'}
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    {content?.news.length || 0} {language === 'zh' ? '条新闻' : 'articles'}
+                  </span>
                 </div>
                 <div className="space-y-4">
-                  {aiNews.slice(0, 3).map((news, index) => (
-                    <NewsCard key={index} news={news} />
-                  ))}
+                  {content?.news.slice(0, 6).map((news, index) => (
+                    <NewsCard key={index} news={news} language={language} />
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      {language === 'zh' ? '暂无数据' : 'No data available'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -116,15 +123,22 @@ export function ContentSection() {
           <TabsContent value="github">
             <div className="mt-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">GitHub 趋势</h2>
-                <a href="#" className="text-sm text-blue-600 hover:underline">
-                  查看更多
-                </a>
+                <h3 className="text-2xl font-semibold text-gray-900 flex items-center">
+                  <Github className="h-6 w-6 mr-2 text-blue-600" />
+                  GitHub {language === 'zh' ? '趋势' : 'Trending'}
+                </h3>
+                <span className="text-sm text-gray-500">
+                  {content?.trending.length || 0} {language === 'zh' ? '个项目' : 'projects'}
+                </span>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                {trendingRepos.map((repo, index) => (
-                  <GithubCard key={index} repo={repo} />
-                ))}
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {content?.trending.map((repo, index) => (
+                  <GithubCard key={index} repo={repo} language={language} />
+                )) || (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    {language === 'zh' ? '暂无数据' : 'No data available'}
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -132,51 +146,95 @@ export function ContentSection() {
           <TabsContent value="ai">
             <div className="mt-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">AI 新闻</h2>
-                <a href="#" className="text-sm text-blue-600 hover:underline">
-                  查看更多
-                </a>
+                <h3 className="text-2xl font-semibold text-gray-900 flex items-center">
+                  <Newspaper className="h-6 w-6 mr-2 text-purple-600" />
+                  AI {language === 'zh' ? '新闻' : 'News'}
+                </h3>
+                <span className="text-sm text-gray-500">
+                  {content?.news.length || 0} {language === 'zh' ? '条新闻' : 'articles'}
+                </span>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                {aiNews.map((news, index) => (
-                  <NewsCard key={index} news={news} />
-                ))}
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {content?.news.map((news, index) => (
+                  <NewsCard key={index} news={news} language={language} />
+                )) || (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    {language === 'zh' ? '暂无数据' : 'No data available'}
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
         </Tabs>
+
+        {content?.lastUpdated && (
+          <div className="text-center mt-8 text-sm text-gray-500">
+            {language === 'zh' ? '最后更新：' : 'Last updated: '}
+            {new Date(content.lastUpdated).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')}
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
-function GithubCard({ repo }: { repo: any }) {
+function GithubCard({ repo, language }: { repo: TrendingItem; language: 'zh' | 'en' }) {
+  const getLanguageColor = (lang: string) => {
+    const colors: { [key: string]: string } = {
+      'TypeScript': 'bg-blue-500',
+      'JavaScript': 'bg-yellow-500',
+      'Python': 'bg-green-500',
+      'Rust': 'bg-orange-500',
+      'Go': 'bg-cyan-500',
+      'Java': 'bg-red-500',
+      'C++': 'bg-pink-500',
+      'C': 'bg-gray-500',
+      'Swift': 'bg-orange-400',
+      'Kotlin': 'bg-purple-500',
+    }
+    return colors[lang] || 'bg-gray-400'
+  }
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-blue-600 truncate mb-1">
-              <a href={repo.url} className="hover:underline">
-                {repo.name}
+            <h4 className="font-medium text-blue-600 truncate mb-2">
+              <a 
+                href={repo.repoUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                {repo.title}
               </a>
-            </h3>
-            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{repo.description}</p>
+            </h4>
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{repo.description}</p>
             <div className="flex items-center space-x-4 text-xs text-gray-500">
-              <div className="flex items-center">
-                <div
-                  className={`w-2 h-2 rounded-full bg-${repo.language === "TypeScript" ? "blue" : repo.language === "JavaScript" ? "yellow" : repo.language === "Python" ? "green" : "red"}-500 mr-1`}
-                ></div>
-                {repo.language}
-              </div>
+              {repo.language && (
+                <div className="flex items-center">
+                  <div className={`w-2 h-2 rounded-full ${getLanguageColor(repo.language)} mr-1`}></div>
+                  {repo.language}
+                </div>
+              )}
               <div className="flex items-center">
                 <Star className="w-3 h-3 mr-1" />
                 {repo.stars.toLocaleString()}
               </div>
-              <div className="text-green-600">+{repo.todayStars}</div>
+              {repo.todayStars && repo.todayStars > 0 && (
+                <div className="text-green-600 font-medium">
+                  +{repo.todayStars} {language === 'zh' ? '今日' : 'today'}
+                </div>
+              )}
             </div>
           </div>
-          <a href={repo.url} className="ml-2 text-gray-400 hover:text-gray-600">
+          <a 
+            href={repo.repoUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="ml-2 text-gray-400 hover:text-blue-600 transition-colors"
+          >
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>
@@ -185,24 +243,49 @@ function GithubCard({ repo }: { repo: any }) {
   )
 }
 
-function NewsCard({ news }: { news: any }) {
+function NewsCard({ news, language }: { news: NewsItem; language: 'zh' | 'en' }) {
+  const summary = language === 'zh' ? news.summaryZh : news.summaryEn
+  const timeAgo = getTimeAgo(news.publishedAt, language)
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500">
       <CardContent className="p-4">
-        <h3 className="font-medium text-gray-900 mb-1">
-          <a href={news.url} className="hover:text-blue-600">
+        <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">
+          <a 
+            href={news.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-purple-600 transition-colors"
+          >
             {news.title}
           </a>
-        </h3>
-        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{news.summary}</p>
+        </h4>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+          {summary || news.rawText.substring(0, 150) + '...'}
+        </p>
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>{news.source}</span>
+          <span className="font-medium">{news.source}</span>
           <div className="flex items-center">
             <Clock className="w-3 h-3 mr-1" />
-            {news.time}
+            {timeAgo}
           </div>
         </div>
       </CardContent>
     </Card>
   )
+}
+
+function getTimeAgo(dateString: string, language: 'zh' | 'en'): string {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+  
+  if (diffInHours < 1) {
+    return language === 'zh' ? '刚刚' : 'Just now'
+  } else if (diffInHours < 24) {
+    return language === 'zh' ? `${diffInHours}小时前` : `${diffInHours}h ago`
+  } else {
+    const diffInDays = Math.floor(diffInHours / 24)
+    return language === 'zh' ? `${diffInDays}天前` : `${diffInDays}d ago`
+  }
 }

@@ -1,0 +1,19 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 8 * * *"
+    }
+  ],
+  "functions": {
+    "app/api/content/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/email/send/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/cron/daily/route.ts": {
+      "maxDuration": 300
+    }
+  }
+} 

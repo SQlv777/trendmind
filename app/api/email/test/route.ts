@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resend, FROM_EMAIL } from '@/lib/resend';
 import { ChineseEmailTemplate, EnglishEmailTemplate, GitHubRepo, NewsItem } from '@/components/email-templates';
-import { renderToString } from 'react-dom/server';
+import { render } from '@react-email/render';
 import React from 'react';
 
 // 模拟数据
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const EmailTemplate = language === 'zh' ? ChineseEmailTemplate : EnglishEmailTemplate;
     
     // 渲染邮件HTML
-    const emailHtml = renderToString(React.createElement(EmailTemplate, {
+    const emailHtml = await render(React.createElement(EmailTemplate, {
       language,
       githubRepos: mockGithubRepos,
       newsItems: mockNewsItems,
